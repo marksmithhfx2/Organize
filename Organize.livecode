@@ -1,0 +1,39 @@
+Stack file version 5.5
+
+stack "Organize"
+    property size 375,667
+    property location 187,334
+    property acceleratedRendering true
+    property resizable false
+    property decorations none
+    property titleVisibility false
+    property showBorder false
+    property backgroundColor 16777215
+    property cantModify true
+    property cantDelete true
+    property cantScript false
+    property fullscreenMode "exactFit"
+    property iosStatusBarStyle "translucent black"
+    property iosSupportedOrientations "portrait,portrait upside down"
+    property mobileMode true
+    custom property set "iosDeployment"
+        property bundleIdentifier "com.organize.todo"
+        property deploymentTarget "iOS"
+        property deviceProfile "iphone"
+        property statusBarVisible false
+        property allowOrientationChange false
+    card id 1001
+        name "Main List View"
+        property backgroundColor 16777215
+        property topleft 0,0
+        property size 375,667
+    card id 1002
+        name "Topic Pages"
+        property backgroundColor 16777215
+        property topleft 0,0
+        property size 375,667
+    card id 1003
+        name "Settings"
+        property backgroundColor 16777215
+        property topleft 0,0
+        property size 375,667
