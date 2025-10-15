@@ -1,44 +1,40 @@
-# LiveCode generated files and build artifacts
+# LiveCode generated or temporary files
 *.livecode~
 *.livecodescript~
+*.lcw
 *.lck
 *.lcc
 *.lxd
 *.lca
 *.lcb
-*.lcw
 *.rev
 
-# Mobile build outputs
+# Build outputs
+build/
+dist/
 *.ipa
 *.apk
 *.app
-*.mobileprovision
 *.dSYM
-build/
-dist/
+*.mobileprovision
 
-# IDE state files
+# IDE caches and temporary files
 *.tmp
 *.bak
 *.log
 *.swp
 *.swo
 
-# macOS Finder metadata
+# OS-specific metadata
 .DS_Store
 */.DS_Store
-
-# Windows Thumbnails
 Thumbs.db
 
-# Xcode derived data (if LiveCode integrates with Xcode)
+# Xcode ancillary data
 DerivedData/
 xcuserdata/
 
-# Node or scripting dependencies (if introduced later)
+# General development artifacts
 node_modules/
-
-# Python cache (in case of build scripts)
 __pycache__/
 *.pyc
