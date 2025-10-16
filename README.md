@@ -35,6 +35,10 @@ Mobile-appropriate stack properties (phone-sized dimensions, orientation, fullsc
 3. **Verify Mobile Settings**:
    - With the stack open, review the stack inspector to confirm the mobile configuration values (dimensions, orientation, bundle identifier, etc.). Adjust as required for your environment.
 
+## Database Schema & Data API
+
+The stack automatically initialises an SQLite database (triggered from `Organize.livecode`'s `preOpenStack`) that powers both date-based and topic-based lists. Schema details, performance considerations, and usage examples for every public handler are documented in [docs/database.md](docs/database.md).
+
 ## Preparing for iOS Deployment
 
 Before building a standalone iOS application, ensure you have:

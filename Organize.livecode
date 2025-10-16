@@ -37,3 +37,319 @@ stack "Organize"
         property backgroundColor 16777215
         property topleft 0,0
         property size 375,667
+    script
+        local sOrganizeDatabaseID
+        local sOrganizeDatabasePath
+
+        on preOpenStack
+            organizeInitializeDatabase
+        end preOpenStack
+
+        on closeStack
+            organizeCloseDatabase
+        end closeStack
+
+        function organizeDatabaseConnection
+            if sOrganizeDatabaseID is empty then organizeInitializeDatabase
+            return sOrganizeDatabaseID
+        end organizeDatabaseConnection
+
+        command organizeInitializeDatabase
+            if sOrganizeDatabaseID is not empty then exit organizeInitializeDatabase
+            put organizeDatabasePath() into sOrganizeDatabasePath
+            organizeEnsureDatabaseFolderExists sOrganizeDatabasePath
+            put revOpenDatabase("sqlite", sOrganizeDatabasePath) into sOrganizeDatabaseID
+            if sOrganizeDatabaseID is not a number then
+                throw "Unable to open Organize database:" && sOrganizeDatabaseID
+            end if
+            organizeConfigureDatabase
+            organizeEnsureSchema
+        end organizeInitializeDatabase
+
+        command organizeConfigureDatabase
+            organizeApplyPragma "PRAGMA foreign_keys = ON"
+            organizeApplyPragma "PRAGMA journal_mode = WAL"
+            organizeApplyPragma "PRAGMA synchronous = NORMAL"
+            organizeApplyPragma "PRAGMA cache_size = -8000"
+            organizeApplyPragma "PRAGMA temp_store = MEMORY"
+        end organizeConfigureDatabase
+
+        command organizeEnsureSchema
+            local tSQL
+            put "CREATE TABLE IF NOT EXISTS list_items (" & cr into tSQL
+            put tSQL & "    id INTEGER PRIMARY KEY," & cr into tSQL
+            put tSQL & "    content TEXT NOT NULL," & cr into tSQL
+            put tSQL & "    is_completed INTEGER NOT NULL DEFAULT 0," & cr into tSQL
+            put tSQL & "    position INTEGER NOT NULL DEFAULT 0," & cr into tSQL
+            put tSQL & "    item_date TEXT," & cr into tSQL
+            put tSQL & "    topic TEXT," & cr into tSQL
+            put tSQL & "    created_at TEXT NOT NULL DEFAULT (datetime('now'))," & cr into tSQL
+            put tSQL & "    updated_at TEXT NOT NULL DEFAULT (datetime('now'))," & cr into tSQL
+            put tSQL & "    CHECK ((item_date IS NOT NULL AND topic IS NULL) OR (item_date IS NULL AND topic IS NOT NULL))" & cr into tSQL
+            put tSQL & ")" into tSQL
+            organizeExecuteSQL tSQL
+
+            organizeExecuteSQL "CREATE INDEX IF NOT EXISTS idx_list_items_item_date ON list_items(item_date)"
+            organizeExecuteSQL "CREATE INDEX IF NOT EXISTS idx_list_items_topic ON list_items(topic)"
+            organizeExecuteSQL "CREATE INDEX IF NOT EXISTS idx_list_items_date_position ON list_items(item_date, position)"
+            organizeExecuteSQL "CREATE INDEX IF NOT EXISTS idx_list_items_topic_position ON list_items(topic, position)"
+        end organizeEnsureSchema
+
+        command organizeCloseDatabase
+            if sOrganizeDatabaseID is empty then exit organizeCloseDatabase
+            revCloseDatabase sOrganizeDatabaseID
+            put empty into sOrganizeDatabaseID
+        end organizeCloseDatabase
+
+        function organizeDatabasePath
+            if sOrganizeDatabasePath is empty then
+                put specialFolderPath("documents") into tBase
+                if tBase is empty then
+                    put specialFolderPath("resources") into tBase
+                end if
+                if tBase is empty then
+                    put specialFolderPath("home") into tBase
+                end if
+                put tBase & "/organize.sqlite" into sOrganizeDatabasePath
+            end if
+            return sOrganizeDatabasePath
+        end organizeDatabasePath
+
+        command organizeEnsureDatabaseFolderExists pFilePath
+            local tOldDelimiter
+            put the itemDelimiter into tOldDelimiter
+            set the itemDelimiter to "/"
+            put item 1 to -2 of pFilePath into tFolder
+            set the itemDelimiter to tOldDelimiter
+            if tFolder is empty then exit organizeEnsureDatabaseFolderExists
+            if there is not a folder tFolder then
+                create folder tFolder
+            end if
+        end organizeEnsureDatabaseFolderExists
+
+        command organizeApplyPragma pStatement
+            if sOrganizeDatabaseID is empty then organizeInitializeDatabase
+            put revDataFromQuery(tab, return, sOrganizeDatabaseID, pStatement) into tIgnored
+            put the result into tResult
+            if tResult is not empty then
+                throw "Organize database error:" && tResult & cr & pStatement
+            end if
+        end organizeApplyPragma
+
+        command organizeExecuteSQL pSQL
+            if sOrganizeDatabaseID is empty then organizeInitializeDatabase
+            revExecuteSQL sOrganizeDatabaseID, pSQL
+            put the result into tResult
+            if tResult is not empty then
+                throw "Organize database error:" && tResult & cr & pSQL
+            end if
+        end organizeExecuteSQL
+
+        function organizeQueryAsArray pSQL
+            if sOrganizeDatabaseID is empty then organizeInitializeDatabase
+            put revDataFromQuery(tab, return, sOrganizeDatabaseID, pSQL) into tData
+            put the result into tResult
+            if tResult is not empty then
+                throw "Organize database error:" && tResult & cr & pSQL
+            end if
+            if tData is empty then return empty
+
+            put empty into tRecordsA
+            put 1 into tIndex
+            repeat for each line tLine in tData
+                if tLine is empty then next repeat
+                put tLine into tLineData
+                split tLineData by tab
+                put empty into tRow
+                put organizeToInteger(tLineData[1]) into tRow["id"]
+                put tLineData[2] into tRow["content"]
+                put organizeToInteger(tLineData[3]) into tRow["isCompleted"]
+                put organizeToInteger(tLineData[4]) into tRow["position"]
+                put tLineData[5] into tRow["itemDate"]
+                put tLineData[6] into tRow["topic"]
+                put tLineData[7] into tRow["createdAt"]
+                put tLineData[8] into tRow["updatedAt"]
+                put tRow into tRecordsA[tIndex]
+                add 1 to tIndex
+            end repeat
+
+            return tRecordsA
+        end organizeQueryAsArray
+
+        function organizeFetchItemsByDate pISODate
+            if pISODate is empty then
+                throw "Date is required to fetch items."
+            end if
+            local tSQL
+            put "SELECT id, content, is_completed, position, item_date, topic, created_at, updated_at" & cr into tSQL
+            put tSQL & "FROM list_items" & cr into tSQL
+            put tSQL & "WHERE item_date = " & organizeQuote(pISODate) & cr into tSQL
+            put tSQL & "ORDER BY position, id" into tSQL
+            return organizeQueryAsArray(tSQL)
+        end organizeFetchItemsByDate
+
+        function organizeFetchItemsByTopic pTopic
+            if pTopic is empty then
+                throw "Topic is required to fetch items."
+            end if
+            local tSQL
+            put "SELECT id, content, is_completed, position, item_date, topic, created_at, updated_at" & cr into tSQL
+            put tSQL & "FROM list_items" & cr into tSQL
+            put tSQL & "WHERE topic = " & organizeQuote(pTopic) & cr into tSQL
+            put tSQL & "ORDER BY position, id" into tSQL
+            return organizeQueryAsArray(tSQL)
+        end organizeFetchItemsByTopic
+
+        function organizeInsertDateItem pContent, pISODate, pPosition
+            if pISODate is empty then
+                throw "Date is required to insert a date-based item."
+            end if
+            local tPosition
+            put organizeResolvedPosition(pPosition, "item_date", pISODate) into tPosition
+
+            local tSQL
+            put "INSERT INTO list_items (content, is_completed, position, item_date, topic)" & cr into tSQL
+            put tSQL & "VALUES (" & organizeQuote(pContent) & ", 0, " & tPosition & ", " & organizeQuote(pISODate) & ", NULL)" into tSQL
+            organizeExecuteSQL tSQL
+
+            return revDatabaseLastRowID(sOrganizeDatabaseID)
+        end organizeInsertDateItem
+
+        function organizeInsertTopicItem pContent, pTopic, pPosition
+            if pTopic is empty then
+                throw "Topic is required to insert a topic-based item."
+            end if
+            local tPosition
+            put organizeResolvedPosition(pPosition, "topic", pTopic) into tPosition
+
+            local tSQL
+            put "INSERT INTO list_items (content, is_completed, position, item_date, topic)" & cr into tSQL
+            put tSQL & "VALUES (" & organizeQuote(pContent) & ", 0, " & tPosition & ", NULL, " & organizeQuote(pTopic) & ")" into tSQL
+            organizeExecuteSQL tSQL
+
+            return revDatabaseLastRowID(sOrganizeDatabaseID)
+        end organizeInsertTopicItem
+
+        command organizeUpdateItemContent pItemID, pContent
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tSQL
+            put "UPDATE list_items SET content = " & organizeQuote(pContent) & ", updated_at = datetime('now')" into tSQL
+            put tSQL & " WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeUpdateItemContent
+
+        command organizeUpdateItemPosition pItemID, pPosition
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tResolvedPosition
+            put organizeToInteger(pPosition) into tResolvedPosition
+            local tSQL
+            put "UPDATE list_items SET position = " & tResolvedPosition & ", updated_at = datetime('now')" into tSQL
+            put tSQL & " WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeUpdateItemPosition
+
+        command organizeUpdateItemCompletion pItemID, pIsCompleted
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tCompletion
+            put organizeBooleanToInteger(pIsCompleted) into tCompletion
+            local tSQL
+            put "UPDATE list_items SET is_completed = " & tCompletion & ", updated_at = datetime('now')" into tSQL
+            put tSQL & " WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeUpdateItemCompletion
+
+        command organizeDeleteItem pItemID
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tSQL
+            put "DELETE FROM list_items WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeDeleteItem
+
+        command organizeMoveItemToDate pItemID, pISODate, pPosition
+            if pISODate is empty then
+                throw "Date is required to move an item to a date-based list."
+            end if
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tPosition
+            put organizeResolvedPosition(pPosition, "item_date", pISODate) into tPosition
+
+            local tSQL
+            put "UPDATE list_items SET item_date = " & organizeQuote(pISODate) & ", topic = NULL, position = " & tPosition & ", updated_at = datetime('now')" into tSQL
+            put tSQL & " WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeMoveItemToDate
+
+        command organizeMoveItemToTopic pItemID, pTopic, pPosition
+            if pTopic is empty then
+                throw "Topic is required to move an item to a topic-based list."
+            end if
+            local tItemID
+            put organizeToInteger(pItemID) into tItemID
+            local tPosition
+            put organizeResolvedPosition(pPosition, "topic", pTopic) into tPosition
+
+            local tSQL
+            put "UPDATE list_items SET topic = " & organizeQuote(pTopic) & ", item_date = NULL, position = " & tPosition & ", updated_at = datetime('now')" into tSQL
+            put tSQL & " WHERE id = " & tItemID into tSQL
+            organizeExecuteSQL tSQL
+        end organizeMoveItemToTopic
+
+        function organizeResolvedPosition pProvidedPosition, pColumn, pValue
+            if pProvidedPosition is empty then
+                return organizeNextPosition(pColumn, pValue)
+            end if
+            return organizeToInteger(pProvidedPosition)
+        end organizeResolvedPosition
+
+        function organizeNextPosition pColumn, pValue
+            if sOrganizeDatabaseID is empty then organizeInitializeDatabase
+            local tSQL
+            put "SELECT COALESCE(MAX(position) + 1, 1) FROM list_items WHERE " & pColumn & " = " & organizeQuote(pValue) into tSQL
+            put revDataFromQuery(tab, return, sOrganizeDatabaseID, tSQL) into tData
+            put the result into tResult
+            if tResult is not empty then
+                throw "Organize database error:" && tResult & cr & tSQL
+            end if
+            replace return with empty in tData
+            replace numToChar(10) with empty in tData
+            if tData is empty then return 1
+            return organizeToInteger(tData)
+        end organizeNextPosition
+
+        function organizeQuote pValue
+            put pValue into tValue
+            replace "'" with "''" in tValue
+            return "'" & tValue & "'"
+        end organizeQuote
+
+        function organizeToInteger pValue
+            put pValue into tValue
+            replace return with empty in tValue
+            replace numToChar(10) with empty in tValue
+            if tValue is empty then return 0
+            if tValue is not a number then
+                throw "Expected numeric value but received:" && pValue
+            end if
+            return round(tValue)
+        end organizeToInteger
+
+        function organizeBooleanToInteger pValue
+            if pValue is a number then
+                if pValue = 0 then
+                    return 0
+                else
+                    return 1
+                end if
+            end if
+            put toLower(pValue) into tLower
+            if tLower is among the words "true yes on checked 1" then
+                return 1
+            end if
+            return 0
+        end organizeBooleanToInteger
+    end script

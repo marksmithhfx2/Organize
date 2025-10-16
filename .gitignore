@@ -9,6 +9,11 @@
 *.lcw
 *.rev
 
+# SQLite database files
+*.sqlite
+*.db
+organize.sqlite
+
 # Mobile build outputs
 *.ipa
 *.apk
