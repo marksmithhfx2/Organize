@@ -27,6 +27,536 @@ stack "Organize"
         property backgroundColor 16777215
         property topleft 0,0
         property size 375,667
+        group id 2001
+            name "HeaderBar"
+            property rect 0,0,375,96
+            property backgroundColor 16382457
+            property showBorder false
+            property vScrollbar false
+            property hScrollbar false
+            button id 2002
+                name "PrevDayButton"
+                property rect 12,36,56,80
+                property label "←"
+                property autoHilite false
+                property showBorder false
+                property textSize 24
+                script
+                    on mouseUp
+                        organizeMainListGoToPreviousDay
+                    end mouseUp
+                end script
+            field id 2004
+                name "DateDisplayField"
+                property rect 68,36,307,80
+                property lockText true
+                property showBorder false
+                property opaque false
+                property textSize 20
+                property textAlign center
+            button id 2003
+                name "NextDayButton"
+                property rect 319,36,363,80
+                property label "→"
+                property autoHilite false
+                property showBorder false
+                property textSize 24
+                script
+                    on mouseUp
+                        organizeMainListGoToNextDay
+                    end mouseUp
+                end script
+            button id 2005
+                name "AddItemButton"
+                property rect 319,12,359,44
+                property label "＋"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+                script
+                    on mouseUp
+                        organizeMainListAddBlankRow
+                    end mouseUp
+                end script
+        group id 2010
+            name "ListScroller"
+            property rect 0,96,375,595
+            property backgroundColor 16777215
+            property showBorder false
+            property vScrollbar true
+            property hScrollbar false
+            script
+                on mouseDoubleUp
+                    organizeMainListAddBlankRow
+                end mouseDoubleUp
+            end script
+        group id 2020
+            name "Row Template"
+            property rect 0,0,375,60
+            property visible false
+            property backgroundColor 16777215
+            property showBorder false
+            button id 2021
+                name "RowCheckboxButton"
+                property rect 12,8,56,52
+                property label "☐"
+                property autoHilite false
+                property showBorder false
+                property textSize 24
+                script
+                    on mouseUp
+                        organizeMainListToggleRowCompletion the owner of me
+                    end mouseUp
+                end script
+            field id 2022
+                name "RowContentField"
+                property rect 64,12,272,52
+                property lockText false
+                property showBorder false
+                property dontWrap true
+                property autoTab false
+                property textSize 17
+                script
+                    on openField
+                        organizeMainListCloseAllRowOptions the owner of me
+                    end openField
+                    on returnInField
+                        organizeMainListAddBlankRow
+                        pass returnInField
+                    end returnInField
+                end script
+            button id 2023
+                name "RowOptionsButton"
+                property rect 280,12,320,52
+                property label "<"
+                property autoHilite false
+                property showBorder false
+                property textSize 20
+                script
+                    on mouseUp
+                        organizeMainListToggleRowOptions the owner of me
+                    end mouseUp
+                end script
+            button id 2024
+                name "RowDragHandleButton"
+                property rect 326,12,366,52
+                property label "≡"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+            group id 2025
+                name "RowOptionsMenu"
+                property rect 190,8,278,56
+                property visible false
+                property backgroundColor 16382457
+                property showBorder false
+                button id 2026
+                    name "RowCalendarButton"
+                    property rect 0,0,40,44
+                    property label "📅"
+                    property autoHilite false
+                    property showBorder false
+                    property textSize 20
+                    script
+                        on mouseUp
+                            organizeMainListRequestMoveRow the owner of the owner of me
+                        end mouseUp
+                    end script
+                button id 2027
+                    name "RowDeleteButton"
+                    property rect 44,0,84,44
+                    property label "🗑"
+                    property autoHilite false
+                    property showBorder false
+                    property textSize 20
+                    script
+                        on mouseUp
+                            organizeMainListRequestDeleteRow the owner of the owner of me
+                        end mouseUp
+                    end script
+        group id 2030
+            name "FooterBar"
+            property rect 0,595,375,667
+            property backgroundColor 15790320
+            property showBorder false
+            button id 2031
+                name "FooterHomeButton"
+                property rect 16,12,88,64
+                property label "🏠"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+                script
+                    on mouseUp
+                        organizeMainListGoToToday
+                    end mouseUp
+                end script
+            button id 2032
+                name "FooterCalendarButton"
+                property rect 110,12,182,64
+                property label "📅"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+                script
+                    on mouseUp
+                        organizeMainListShowCalendar
+                    end mouseUp
+                end script
+            button id 2033
+                name "FooterPagesButton"
+                property rect 204,12,276,64
+                property label "🗂"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+                script
+                    on mouseUp
+                        organizeMainListNavigateToTopics
+                    end mouseUp
+                end script
+            button id 2034
+                name "FooterSettingsButton"
+                property rect 298,12,370,64
+                property label "⚙︎"
+                property autoHilite false
+                property showBorder false
+                property textSize 22
+                script
+                    on mouseUp
+                        organizeMainListNavigateToSettings
+                    end mouseUp
+                end script
+        script
+            local sMainListSelectedISODate
+            local sMainListTodayISODate
+            local sMainListRowIDsA
+
+            on preOpenCard
+                organizeMainListInitialize
+            end preOpenCard
+
+            command organizeMainListInitialize
+                put organizeMainListSecondsToISODate(the seconds) into sMainListTodayISODate
+                if sMainListSelectedISODate is empty then
+                    put sMainListTodayISODate into sMainListSelectedISODate
+                end if
+                organizeMainListRefreshItems
+            end organizeMainListInitialize
+
+            command organizeMainListRefreshItems
+                local tItemsA
+                if sMainListSelectedISODate is empty then
+                    put organizeMainListSecondsToISODate(the seconds) into sMainListSelectedISODate
+                end if
+                organizeMainListUpdateHeader
+                try
+                    put organizeFetchItemsByDate(sMainListSelectedISODate) into tItemsA
+                catch tError
+                    put empty into tItemsA
+                end try
+                organizeMainListBuildRows tItemsA
+            end organizeMainListRefreshItems
+
+            command organizeMainListUpdateHeader
+                put organizeMainListFormattedDate(sMainListSelectedISODate) into field "DateDisplayField" of group "HeaderBar"
+            end organizeMainListUpdateHeader
+
+            command organizeMainListGoToPreviousDay
+                if sMainListSelectedISODate is empty then
+                    put organizeMainListSecondsToISODate(the seconds) into sMainListSelectedISODate
+                end if
+                put organizeMainListShiftISODate(sMainListSelectedISODate, -1) into sMainListSelectedISODate
+                organizeMainListRefreshItems
+            end organizeMainListGoToPreviousDay
+
+            command organizeMainListGoToNextDay
+                if sMainListSelectedISODate is empty then
+                    put organizeMainListSecondsToISODate(the seconds) into sMainListSelectedISODate
+                end if
+                put organizeMainListShiftISODate(sMainListSelectedISODate, 1) into sMainListSelectedISODate
+                organizeMainListRefreshItems
+            end organizeMainListGoToNextDay
+
+            command organizeMainListGoToToday
+                put organizeMainListSecondsToISODate(the seconds) into sMainListTodayISODate
+                put sMainListTodayISODate into sMainListSelectedISODate
+                organizeMainListRefreshItems
+            end organizeMainListGoToToday
+
+            command organizeMainListShowCalendar
+                send "organizeShowCalendar" && sMainListSelectedISODate to stack "Organize" in 0 milliseconds
+            end organizeMainListShowCalendar
+
+            command organizeMainListNavigateToTopics
+                organizeMainListCloseAllRowOptions empty
+                go card id 1002 of stack "Organize"
+            end organizeMainListNavigateToTopics
+
+            command organizeMainListNavigateToSettings
+                organizeMainListCloseAllRowOptions empty
+                go card id 1003 of stack "Organize"
+            end organizeMainListNavigateToSettings
+
+            command organizeMainListBuildRows pItemsA
+                lock screen
+                organizeMainListClearRows
+                put 0 into tNextTop
+                if pItemsA is empty then
+                    put organizeMainListAddRow(empty, tNextTop, true) into tRowInfoA
+                    set the vScroll of group "ListScroller" to 0
+                    unlock screen
+                    organizeMainListFocusRow tRowInfoA["rowID"]
+                    exit command
+                end if
+                repeat with tIndex = 1 to the number of elements of pItemsA
+                    put pItemsA[tIndex] into tItemA
+                    put organizeMainListAddRow(tItemA, tNextTop, false) into tRowInfoA
+                    add tRowInfoA["height"] to tNextTop
+                end repeat
+                set the vScroll of group "ListScroller" to 0
+                unlock screen
+            end organizeMainListBuildRows
+
+            command organizeMainListClearRows
+                if sMainListRowIDsA is an array then
+                    repeat for each key tKey in sMainListRowIDsA
+                        put sMainListRowIDsA[tKey] into tRowID
+                        if tRowID is not empty and there is a group id tRowID then
+                            delete group id tRowID
+                        end if
+                    end repeat
+                end if
+                put empty into sMainListRowIDsA
+            end organizeMainListClearRows
+
+            function organizeMainListAddRow pItemA, pTop, pIsNewRow
+                local tScrollerLongID, tRowLongID, tRowID
+                local tTemplateRect, tRowHeight, tRowWidth
+                put the long id of group "ListScroller" into tScrollerLongID
+                copy group "Row Template" to group tScrollerLongID
+                put the long id of the last group of group tScrollerLongID into tRowLongID
+                put the id of group tRowLongID into tRowID
+                set the visible of group tRowLongID to true
+                put the rect of group "Row Template" into tTemplateRect
+                put item 4 of tTemplateRect - item 2 into tRowHeight
+                put item 3 of tTemplateRect - item 1 into tRowWidth
+                set the rect of group tRowLongID to 0,pTop,tRowWidth,pTop + tRowHeight
+                set the uItemId of group tRowLongID to empty
+                set the uIsCompleted of group tRowLongID to false
+                set the uIsNewRow of group tRowLongID to pIsNewRow
+                set the text of field "RowContentField" of group tRowLongID to empty
+                set the label of button "RowCheckboxButton" of group tRowLongID to "☐"
+                if there is a group "RowOptionsMenu" of group tRowLongID then
+                    set the visible of group "RowOptionsMenu" of group tRowLongID to false
+                end if
+                if pItemA is an array then
+                    if pItemA["content"] is not empty then
+                        set the text of field "RowContentField" of group tRowLongID to pItemA["content"]
+                    end if
+                    set the uItemId of group tRowLongID to pItemA["id"]
+                    set the uIsCompleted of group tRowLongID to (pItemA["isCompleted"] is 1)
+                    if pItemA["isCompleted"] is 1 then
+                        set the label of button "RowCheckboxButton" of group tRowLongID to "☑︎"
+                    end if
+                    set the enabled of button "RowOptionsButton" of group tRowLongID to true
+                else
+                    set the enabled of button "RowOptionsButton" of group tRowLongID to false
+                end if
+                if the uIsCompleted of group tRowLongID is true then
+                    set the label of button "RowCheckboxButton" of group tRowLongID to "☑︎"
+                end if
+                put organizeMainListNextRowIndex() into tRowIndex
+                put tRowID into sMainListRowIDsA[tRowIndex]
+                put empty into tRowInfoA
+                put tRowID into tRowInfoA["rowID"]
+                put tRowHeight into tRowInfoA["height"]
+                return tRowInfoA
+            end organizeMainListAddRow
+
+            function organizeMainListNextRowIndex
+                if sMainListRowIDsA is an array then
+                    put the keys of sMainListRowIDsA into tKeys
+                    if tKeys is not empty then
+                        put the number of lines of tKeys into tCount
+                        add 1 to tCount
+                        return tCount
+                    end if
+                end if
+                return 1
+            end organizeMainListNextRowIndex
+
+            command organizeMainListFocusRow pRowID
+                put organizeMainListResolveRowID(pRowID) into tRowID
+                if tRowID is empty then exit organizeMainListFocusRow
+                focus on field "RowContentField" of group id tRowID
+                select after field "RowContentField" of group id tRowID
+                organizeMainListScrollRowIntoView tRowID
+            end organizeMainListFocusRow
+
+            command organizeMainListAddBlankRow
+                organizeMainListCloseAllRowOptions empty
+                put organizeMainListNextRowTop() into tTop
+                put organizeMainListAddRow(empty, tTop, true) into tRowInfoA
+                organizeMainListFocusRow tRowInfoA["rowID"]
+            end organizeMainListAddBlankRow
+
+            function organizeMainListNextRowTop
+                if sMainListRowIDsA is empty then return 0
+                put the keys of sMainListRowIDsA into tKeys
+                if tKeys is empty then return 0
+                sort lines of tKeys numeric ascending
+                put 0 into tMaxBottom
+                repeat for each line tKey in tKeys
+                    put sMainListRowIDsA[tKey] into tRowID
+                    if tRowID is not empty and there is a group id tRowID then
+                        put max(tMaxBottom, the bottom of group id tRowID) into tMaxBottom
+                    end if
+                end repeat
+                return tMaxBottom
+            end organizeMainListNextRowTop
+
+            command organizeMainListScrollRowIntoView pRowID
+                put organizeMainListResolveRowID(pRowID) into tRowID
+                if tRowID is empty then exit organizeMainListScrollRowIntoView
+                put the long id of group "ListScroller" into tScrollerLongID
+                put the rect of group tScrollerLongID into tScrollerRect
+                put item 4 of tScrollerRect - item 2 into tVisibleHeight
+                put the vScroll of group tScrollerLongID into tCurrentScroll
+                put the top of group id tRowID into tRowTop
+                put the bottom of group id tRowID into tRowBottom
+                put tCurrentScroll into tNewScroll
+                if tRowTop < tCurrentScroll then
+                    put tRowTop into tNewScroll
+                end if
+                if tRowBottom > tCurrentScroll + tVisibleHeight then
+                    put tRowBottom - tVisibleHeight into tNewScroll
+                end if
+                if tNewScroll < 0 then put 0 into tNewScroll
+                set the vScroll of group tScrollerLongID to tNewScroll
+            end organizeMainListScrollRowIntoView
+
+            command organizeMainListToggleRowOptions pRowRef
+                put organizeMainListResolveRowID(pRowRef) into tRowID
+                if tRowID is empty then exit organizeMainListToggleRowOptions
+                if the enabled of button "RowOptionsButton" of group id tRowID is false then exit organizeMainListToggleRowOptions
+                put the long id of group "RowOptionsMenu" of group id tRowID into tOptionsLongID
+                if tOptionsLongID is empty then exit organizeMainListToggleRowOptions
+                if the visible of group tOptionsLongID is true then
+                    set the visible of group tOptionsLongID to false
+                else
+                    organizeMainListCloseAllRowOptions group id tRowID
+                    set the visible of group tOptionsLongID to true
+                end if
+            end organizeMainListToggleRowOptions
+
+            command organizeMainListCloseAllRowOptions pExceptRow
+                if sMainListRowIDsA is not an array then exit organizeMainListCloseAllRowOptions
+                put organizeMainListResolveRowID(pExceptRow) into tExceptRowID
+                put the keys of sMainListRowIDsA into tKeys
+                if tKeys is empty then exit organizeMainListCloseAllRowOptions
+                sort lines of tKeys numeric ascending
+                repeat for each line tKey in tKeys
+                    put sMainListRowIDsA[tKey] into tRowID
+                    if tRowID is empty then next repeat
+                    if tExceptRowID is not empty and tRowID = tExceptRowID then next repeat
+                    if there is a group "RowOptionsMenu" of group id tRowID then
+                        set the visible of group "RowOptionsMenu" of group id tRowID to false
+                    end if
+                end repeat
+            end organizeMainListCloseAllRowOptions
+
+            command organizeMainListRequestMoveRow pRowRef
+                put organizeMainListResolveRowID(pRowRef) into tRowID
+                if tRowID is empty then exit organizeMainListRequestMoveRow
+                put organizeMainListRowItemId(tRowID) into tItemID
+                if tItemID is empty then exit organizeMainListRequestMoveRow
+                send "organizeMoveItemToDateRequested" && tItemID && sMainListSelectedISODate to stack "Organize" in 0 milliseconds
+            end organizeMainListRequestMoveRow
+
+            command organizeMainListRequestDeleteRow pRowRef
+                put organizeMainListResolveRowID(pRowRef) into tRowID
+                if tRowID is empty then exit organizeMainListRequestDeleteRow
+                put organizeMainListRowItemId(tRowID) into tItemID
+                if tItemID is empty then exit organizeMainListRequestDeleteRow
+                send "organizeDeleteItemRequested" && tItemID to stack "Organize" in 0 milliseconds
+            end organizeMainListRequestDeleteRow
+
+            command organizeMainListToggleRowCompletion pRowRef
+                put organizeMainListResolveRowID(pRowRef) into tRowID
+                if tRowID is empty then exit organizeMainListToggleRowCompletion
+                put the label of button "RowCheckboxButton" of group id tRowID into tLabel
+                put false into tNewState
+                if tLabel = "☑︎" then
+                    set the label of button "RowCheckboxButton" of group id tRowID to "☐"
+                else
+                    set the label of button "RowCheckboxButton" of group id tRowID to "☑︎"
+                    put true into tNewState
+                end if
+                set the uIsCompleted of group id tRowID to tNewState
+                put organizeMainListRowItemId(tRowID) into tItemID
+                if tItemID is not empty then
+                    send "organizeToggleItemCompletionRequested" && tItemID && tNewState to stack "Organize" in 0 milliseconds
+                end if
+            end organizeMainListToggleRowCompletion
+
+            function organizeMainListRowItemId pRowRef
+                put organizeMainListResolveRowID(pRowRef) into tRowID
+                if tRowID is empty then return empty
+                return the uItemId of group id tRowID
+            end organizeMainListRowItemId
+
+            function organizeMainListResolveRowID pRowRef
+                if pRowRef is empty then return empty
+                if pRowRef is a number then
+                    if there is a group id pRowRef then
+                        return pRowRef
+                    else
+                        return empty
+                    end if
+                end if
+                try
+                    put the id of pRowRef into tRowID
+                    return tRowID
+                catch tError
+                    return empty
+                end try
+            end organizeMainListResolveRowID
+
+            function organizeMainListFormattedDate pISODate
+                if pISODate is empty then return empty
+                put pISODate into tDateItems
+                convert tDateItems from isoDate to dateItems
+                put item 7 of tDateItems into tDayOfWeek
+                put item tDayOfWeek of the short weekdayNames into tWeekdayName
+                put item 2 of tDateItems into tMonth
+                put item tMonth of the short monthNames into tMonthName
+                put item 3 of tDateItems into tDay
+                put item 1 of tDateItems into tYear
+                return tWeekdayName & ", " & tMonthName & " " & tDay & ", " & tYear
+            end organizeMainListFormattedDate
+
+            function organizeMainListSecondsToISODate pSeconds
+                put round(pSeconds) into tSeconds
+                convert tSeconds to dateItems
+                return format("%04d-%02d-%02d", item 1 of tSeconds, item 2 of tSeconds, item 3 of tSeconds)
+            end organizeMainListSecondsToISODate
+
+            function organizeMainListISODateToSeconds pISODate
+                if pISODate is empty then return 0
+                put pISODate into tDateItems
+                convert tDateItems from isoDate to dateItems
+                convert tDateItems to seconds
+                return tDateItems
+            end organizeMainListISODateToSeconds
+
+            function organizeMainListShiftISODate pISODate, pDays
+                put organizeMainListISODateToSeconds(pISODate) into tSeconds
+                if tSeconds is 0 then return pISODate
+                add round(pDays) * 86400 to tSeconds
+                return organizeMainListSecondsToISODate(tSeconds)
+            end organizeMainListShiftISODate
+        end script
     card id 1002
         name "Topic Pages"
         property backgroundColor 16777215
