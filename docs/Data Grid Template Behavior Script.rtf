@@ -1,0 +1,1403 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green127\blue0;\red127\green127\blue0;\red127\green0\blue127;
+\red0\green127\blue127;\red0\green0\blue127;}
+{\*\expandedcolortbl;;\csgenericrgb\c0\c49804\c0;\csgenericrgb\c49804\c49804\c0;\csgenericrgb\c49804\c0\c49804;
+\csgenericrgb\c0\c49804\c49804;\csgenericrgb\c0\c0\c49804;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww20160\viewh12660\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs24 \cf2 -- This script defines the behavior of your data grid's custom template. This behavior\
+-- only applies to 'forms' and not 'tables'.\
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 global
+\f1\b0 \cf0  gConnectID, gCurrentCategory, gCurrentCategoryColor, gDefaultColor, gAutocap, gHideChecked, gShowChecked, gFontSize\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 on
+\f1\b0  FillInData pDataArray\
+   
+\f0\b \cf2 -- This message is sent when the Data Grid needs to populate\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- this template with the data from a record. pDataArray is an\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- an array containing the records data.\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- You do not need to resize any of your template's controls in\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- this message. All resizing should be handled in resizeControl.\
+
+\f1\b0 \cf0    \
+   
+\f0\b \cf2 -- Example:\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- answer "Filling in the datagrid todo -> todo"\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 text\cf0  \cf4 of\cf0  \cf4 fld\cf0  \cf6 "todo"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  pDataArray[\cf6 "todo"\cf0 ]\
+   
+\f0\b \cf2 -- put return & "FillIn:" & getColor(pDataArray["category"]) after msg\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 hilitecolor\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  getColor(pDataArray[\cf6 "category"\cf0 ]) 
+\f0\b \cf2 -- works\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 foregroundColor\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  getColor(pDataArray[\cf6 "category"\cf0 ]) 
+\f0\b \cf2 -- works\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 hilite\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  pDataArray[\cf6 "complete"\cf0 ]\
+   
+\f0\b if
+\f1\b0  \cf4 the\cf0  \cf5 hilited\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- if TRUE... THEN...\
+
+\f1\b0 \cf0       
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  iconPresetName \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf6 "check"\cf0  \
+   
+\f0\b else
+\f1\b0  \
+      
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  iconPresetName \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf6 "check empty"\cf0  \
+   
+\f0\b end
+\f1\b0  
+\f0\b if
+\f1\b0  \
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  FillInData\
+\
+
+\f0\b function
+\f1\b0  getColor pCategory\
+   
+\f0\b \cf2 -- returns the color for a specific category in the DB\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf6 "SELECT color FROM Categories WHERE Category="\cf0  & \cf6 "'"\cf0  & pCategory & \cf6 "'"\cf0  \cf4 into\cf0  tSQL\
+   
+\f0\b if
+\f1\b0  gConnectID \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then\
+
+\f1\b0       
+\f0\b \cf3 put
+\f1\b0 \cf0  revDataFromQuery(,,gConnectID,tSQL) \cf4 into\cf0  tResult\
+   
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b if
+\f1\b0  tResult \cf4 is\cf0  \cf4 empty\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf3 put
+\f1\b0 \cf0  gDefaultColor \cf4 into\cf0  tResult\
+   
+\f0\b \cf2 -- put return & "getColor: " & tResult after msg\
+
+\f1\b0 \cf0    
+\f0\b \cf3 return
+\f1\b0 \cf0  tResult\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  getColor\
+\
+
+\f0\b on
+\f1\b0  LayoutControl pControlRect, pWorkingRect\
+   
+\f0\b \cf3 local
+\f1\b0 \cf0  theFieldRect\
+   \
+   
+\f0\b \cf2 -- This message is sent when you should layout your template's controls.\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- This is where you resize the 'Background' graphic, resize fields and \
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- position objects.\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- For fixed height data grid forms you can use items 1 through 4 of pControlRect as\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- boundaries for laying out your controls.\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- For variable height data grid forms you can use items 1 through 3 of pControlRect as\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- boundaries, expanding the height of your control as needed.\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- The working rect is defined area of the control you can safelt use.\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- Use this rect to make sure your controls don't overlap with any edit mode controls.\
+
+\f1\b0 \cf0    \
+   
+\f0\b \cf2 -- Example:\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- set the textsize of fld "todo" of group "DataGrid 1" to 17 -- doesn't work, first line only\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- set the textsize of group "DataGrid 1" to gFontSize -- works\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 textsize\cf0  \cf4 of\cf0  \cf4 fld\cf0  \cf6 "todo"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  gFontSize 
+\f0\b \cf2 -- works\
+
+\f1\b0 \cf0    \
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 field\cf0  \cf6 "todo"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theFieldRect\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theButtonRect\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 button\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theButtonRect2\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "showMenu"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theWidgetRect\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 button\cf0  \cf6 "showMenu"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theButtonRect3\
+   \
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pworkingRect - \cf6 15\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theWidgetRect\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pworkingRect - \cf6 25\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theButtonRect3\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pworkingRect - \cf6 0\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theWidgetRect\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pworkingRect + \cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theButtonRect3\
+   \
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  pworkingRect+\cf6 13\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theButtonRect 
+\f0\b \cf2 -- left\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  pworkingRect+\cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theButtonRect2 
+\f0\b \cf2 -- left\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  pWorkingRect+\cf6 30\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theButtonRect 
+\f0\b \cf2 -- width, button\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  pWorkingRect+\cf6 40\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theButtonRect2 
+\f0\b \cf2 -- width, button\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  pWorkingRect+\cf6 10\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  theButtonRect 
+\f0\b \cf2 -- height, button\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  pWorkingRect+ \cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  theButtonRect3 
+\f0\b \cf2 -- height, button\
+
+\f1\b0 \cf0    \
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theButtonRect+\cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theFieldRect 
+\f0\b \cf2 -- space, next field\
+
+\f1\b0 \cf0    \
+   
+\f0\b switch
+\f1\b0  gFontSize  
+\f0\b \cf2 -- attempt to get the different sized fonts centered in the field height as best as possible\
+
+\f1\b0 \cf0       
+\f0\b case
+\f1\b0  \cf6 13\
+\cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  pWorkingRect+\cf6 11\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  theFieldRect 
+\f0\b \cf2 -- height, field\
+
+\f1\b0 \cf0          
+\f0\b \cf3 break\
+
+\f1\b0 \cf0       
+\f0\b case
+\f1\b0  \cf6 17\
+\cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  pWorkingRect+\cf6 9\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  theFieldRect 
+\f0\b \cf2 -- height, field\
+
+\f1\b0 \cf0          
+\f0\b \cf3 break\
+
+\f1\b0 \cf0       
+\f0\b default\
+
+\f1\b0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  pWorkingRect+\cf6 10\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  theFieldRect 
+\f0\b \cf2 -- height, field\
+
+\f1\b0 \cf0    
+\f0\b end
+\f1\b0  
+\f0\b switch\
+
+\f1\b0    \
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pWorkingRect \cf4 into\cf0  \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  theFieldRect 
+\f0\b \cf2 -- width, field\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pWorkingRect - \cf6 10\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  theButtonRect 
+\f0\b \cf2 -- moves checkmark down??\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pWorkingRect - \cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  theButtonRect2 
+\f0\b \cf2 -- moves checkmark down??\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pWorkingRect \cf4 into\cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  theWidgetRect 
+\f0\b \cf2 -- moves showMenu widget down?\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pWorkingRect - \cf6 5\cf0  \cf4 into\cf0  \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  theButtonRect3 
+\f0\b \cf2 -- moves showMenu button down??\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 field\cf0  \cf6 "todo"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  theFieldRect\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  theButtonRect\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 button\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  theButtonRect2\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "showMenu"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  theWidgetRect\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 button\cf0  \cf6 "showMenu"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  theButtonRect3\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 graphic\cf0  \cf6 "Border"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  (\cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  theFieldRect + \cf6 8\cf0 , \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pControlRect - \cf6 2\cf0 , \cf4 item\cf0  \cf6 3\cf0  \cf4 of\cf0  pControlRect, \cf4 item\cf0  \cf6 4\cf0  \cf4 of\cf0  pControlRect)\
+   \
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 rect\cf0  \cf4 of\cf0  \cf4 graphic\cf0  \cf6 "Background"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  pControlRect\
+   
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 visible\cf0  \cf4 of\cf0  \cf4 graphic\cf0  \cf6 "Border"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 true\
+\cf0    
+\f0\b \cf3 pass
+\f1\b0 \cf0  LayoutControl\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  LayoutControl\
+\
+
+\f0\b on
+\f1\b0  ResetData\
+   
+\f0\b \cf2 -- Sent when data is being emptied because the control is no longer being used to display data\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 text\cf0  \cf4 of\cf0  \cf4 field\cf0  \cf6 "todo"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 empty\
+\cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 hilite\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Check 1"\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 false\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  ResetData\
+\
+\
+
+\f0\b on
+\f1\b0  PreFillInData\
+   
+\f0\b \cf2 -- Sent right before new data is going to replace existing data in the control\
+\cf0 end
+\f1\b0  PreFillInData\
+\
+\
+
+\f0\b setprop
+\f1\b0  dgHilite pBoolean\
+   
+\f0\b \cf2 -- This custom property is set when the highlight of your custom template has\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- changed. By default the "Background" graphic will be highlighted for you. \
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- You only add script here if you want to further customize the highlight.\
+
+\f1\b0 \cf0    \
+   
+\f0\b \cf2 -- Example:\
+
+\f1\b0 \cf0    
+\f0\b if
+\f1\b0  pBoolean 
+\f0\b then\
+
+\f1\b0       
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 foregroundColor\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 the\cf0  dgProp[\cf6 "hilited text color"\cf0 ] \cf4 of\cf0  \cf4 the\cf0  dgControl \cf4 of\cf0  \cf4 me\
+\cf0    
+\f0\b else\
+
+\f1\b0       
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 foregroundColor\cf0  \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 empty\
+\cf0    
+\f0\b end
+\f1\b0  
+\f0\b if\
+end
+\f1\b0  dgHilite\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 getprop
+\f1\b0  dgDataControl\
+   
+\f0\b \cf2 -- Required by library so that it can locate your control.\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf3 return
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 long\cf0  \cf5 ID\cf0  \cf4 of\cf0  \cf4 me\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  dgDataControl\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf2 --on mouseDoubleUp pMouseBtnNum\
+--    local theKey\
+\
+--    -- Example of how to edit the contents of a field.\
+--    -- By passing the index of the record associated with copy of this template being displayed and\
+--    -- a key (array key) the data grid will automatically save the changes the user\
+--    -- makes and refresh the UI by calling FillInData and resizeControl.\
+--    if pMouseBtnNum is 1 then\
+--        if the dgProps["allow editing"] of the dgControl of me then\
+--            switch the short name of the target\
+--                case "Label"\
+--                    put "Label 1" into theKey\
+--                    EditFieldText the long ID of the target, the dgIndex of me, theKey\
+--                    break                 \
+--            end switch\
+--        end if\
+--    end if\
+--    pass mouseDoubleUp\
+--end mouseDoubleUp\
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 on
+\f1\b0  closeField 
+\f0\b \cf2 -- triggered by making changes in a field   \
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0   
+\f0\b \cf2 -- put return & "close field" after msg\
+
+\f1\b0 \cf0   
+\f0\b \cf2 -- updated Sept 15 by Elanor, and modified further by me\
+
+\f1\b0 \cf0    
+\f0\b \cf3 lock
+\f1\b0 \cf0  \cf5 screen\
+\cf0    
+\f0\b \cf3 local
+\f1\b0 \cf0  theItemDate\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- 1. What line are we on? Could also use index\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array (we will update it)\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- put displayArrayData(theDataA,".") -- to see what it looks like\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  theDataA[itemDate] \cf4 into\cf0  theItemDate 
+\f0\b \cf2 -- copy the currently assigned date to a variable (for AddNewRow below)\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 text\cf0  \cf4 of\cf0  \cf4 the\cf0  \cf4 target\cf0  \cf4 into\cf0  tText\
+   
+\f0\b if
+\f1\b0  gAutocap 
+\f0\b then\
+
+\f1\b0       
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 toUpper\cf0 (\cf4 char\cf0  \cf6 1\cf0  \cf4 of\cf0  tText) \cf4 into\cf0  \cf4 char\cf0  \cf6 1\cf0  \cf4 of\cf0  tText 
+\f0\b \cf2 -- upper case 1st char\
+
+\f1\b0 \cf0    
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b \cf3 put
+\f1\b0 \cf0  tText \cf4 into\cf0  theDataA[\cf6 "todo"\cf0 ] 
+\f0\b \cf2 -- 3rd. Modify the array with new content\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- can we actually save the data to file at this point?\
+
+\f1\b0 \cf0    
+\f0\b if
+\f1\b0  theDataA[\cf6 "RowID"\cf0 ] \cf4 is\cf0  \cf4 not\cf0  \cf4 a\cf0  \cf5 number\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- line has never been saved\
+
+\f1\b0 \cf0       
+\f0\b if
+\f1\b0  theDataA[\cf6 "todo"\cf0 ] \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- don't save blank lines\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  gCurrentCategory \cf4 into\cf0  theDataA[\cf6 "category"\cf0 ] 
+\f0\b \cf2 -- assign catetory only the 1st time we save a record\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  SaveTheNewRow(theDataA) \cf4 into\cf0  theDataA[\cf6 "RowID"\cf0 ] 
+\f0\b \cf2 -- function saves a new row (if its not blank) and returns the RowID\
+
+\f1\b0 \cf0       
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[ theLine ] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 to\cf0  theDataA 
+\f0\b \cf2 -- Copy the modified data back to the datagrid\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- put return & displayArrayData(theDataA,".") -- to see what it looks like\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- new stuff to handle auto-generate a new blank line\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgNumberOfLines \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  t\
+   
+\f0\b if
+\f1\b0  theLine = t 
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- we are on the last line...\
+
+\f1\b0 \cf0       
+\f0\b if
+\f1\b0  theDataA[\cf6 "todo"\cf0 ] \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- and it is not blank\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- add new blank row\
+
+\f1\b0 \cf0          AddNewRow theItemDate 
+\f0\b \cf2 -- this is a command in the DG script\
+
+\f1\b0 \cf0       
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b else\
+
+\f1\b0       
+\f0\b \cf2 -- we are not on the last line, so select the next line\
+
+\f1\b0 \cf0       
+\f0\b \cf3 Add
+\f1\b0 \cf0  \cf6 1\cf0  \cf4 to\cf0  theLine\
+      SelectRow theLine\
+   
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b \cf3 unlock
+\f1\b0 \cf0  \cf5 screen\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  closeField\
+\
+
+\f0\b function
+\f1\b0  SaveTheNewRow pTheRowA\
+   
+\f0\b \cf2 ## function saves a new row and returns the SQL RowID\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    SQLInsertRow pTheRowA\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf6 "SELECT last_insert_rowid()"\cf0  \cf4 into\cf0  tSQL\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  revDataFromQuery(,,gConnectID,tSQL) \cf4 into\cf0  tResult\
+   
+\f0\b if
+\f1\b0  (tResult \cf4 begins\cf0  \cf4 with\cf0  \cf6 "revdberr"\cf0 ) 
+\f0\b then\
+
+\f1\b0       
+\f0\b \cf2 ## handle the error\
+
+\f1\b0 \cf0       
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf6 "Unable to SELECT last ROWID: "\cf0  & gConnectID & \cf6 " ("\cf0  & \cf4 the\cf0  \cf4 result\cf0  & \cf6 ")"\cf0  \cf4 into\cf0  tErrMsg\
+      
+\f0\b \cf3 answer
+\f1\b0 \cf0  \cf4 error\cf0  tErrMsg \cf4 as\cf0  
+\f0\b \cf3 sheet\
+
+\f1\b0 \cf0       
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 empty\cf0  \cf4 into\cf0  gConnectID\
+   
+\f0\b else\
+
+\f1\b0       
+\f0\b \cf3 return
+\f1\b0 \cf0  tResult\
+   
+\f0\b end
+\f1\b0  
+\f0\b if\
+end
+\f1\b0  SaveTheNewRow\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 on
+\f1\b0  returnInField\
+   
+\f0\b \cf2 -- replaces exitField, which is normally triggered by exiting a field without making any changes\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- provided by Elanor Sept 15, and further modified by me\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- answer "We are here"\
+
+\f1\b0 \cf0    
+\f0\b \cf3 lock
+\f1\b0 \cf0  \cf5 screen\
+\cf0    
+\f0\b \cf3 local
+\f1\b0 \cf0  theItemDate\
+   
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- 1. What line are we on? Could also use index\
+
+\f1\b0 \cf0    
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgNumberOfLines \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  t\
+   
+\f0\b if
+\f1\b0  theLine = t 
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- we are on the last line\
+
+\f1\b0 \cf0       
+\f0\b if
+\f1\b0  \cf4 the\cf0  \cf5 text\cf0  \cf4 of\cf0  \cf4 the\cf0  \cf4 target\cf0  \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- we are on the last line, and it is not blank\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- add new blank row\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array (just to get the date)\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  theDataA[itemDate] \cf4 into\cf0  theItemDate 
+\f0\b \cf2 -- copy the currently assigned date to a variable\
+
+\f1\b0 \cf0          AddNewRow theItemDate 
+\f0\b \cf2 -- this is a command in the DG script\
+
+\f1\b0 \cf0       
+\f0\b else
+\f1\b0  
+\f0\b \cf2 -- we are on the last line, it is empty, so do nothing\
+
+\f1\b0 \cf0       
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b else
+\f1\b0  
+\f0\b \cf2 -- we are not on the last line so select the next line\
+
+\f1\b0 \cf0       
+\f0\b \cf3 Add
+\f1\b0 \cf0  \cf6 1\cf0  \cf4 to\cf0  theLine\
+      SelectRow theLine\
+   
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0    
+\f0\b \cf3 unlock
+\f1\b0 \cf0  \cf5 screen\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  returnInField\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf2 --on ExitField -- triggered by exiting a field without making any changes\
+--   local theItemDate\
+--   put the dgline of me into theLine -- 1. What line are we on? Could also use index\
+--   -- new stuff to handle auto-generate a new blank line\
+--   put the dgNumberOfLines of me into t\
+--   if theLine = t and the text of the target is not empty then -- we are on the last line, and it is not blank\
+--      add new blank row\
+--      put the dgDataOfLine[theLine] of group "DataGrid 1" into theDataA -- 2. put the whole row into an array (just to get the date)\
+--      put theDataA[itemDate] into theItemDate -- copy the currently assigned date to a variable\
+--      AddNewRow theItemDate -- this is a command in the DG script\
+--   end if\
+--end ExitField\
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 on
+\f1\b0  openField\
+   
+\f0\b \cf2 -- new addition to facilitate activateKeyboard\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- currentline defines a custom property of the group "Datagrid 1"\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- dgControl is the long ID of the group\
+
+\f1\b0 \cf0    
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  currentLine \cf4 of\cf0  \cf4 the\cf0  dgControl \cf4 of\cf0  \cf4 me\cf0  \cf4 to\cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  
+\f0\b \cf2 -- new custom property\
+\pard\pardeftab720\partightenfactor0
+\cf0 end
+\f1\b0  openField\
+\
+
+\f0\b on
+\f1\b0  mouseUp\
+   
+\f0\b \cf3 local
+\f1\b0 \cf0  theCheck\
+   
+\f0\b \cf2 -- answer the short name of the target\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0    
+\f0\b switch
+\f1\b0  \cf4 the\cf0  \cf5 short\cf0  \cf5 name\cf0  \cf4 of\cf0  \cf4 the\cf0  \cf4 target\
+\cf0       
+\f0\b case
+\f1\b0  \cf6 "Check 1"\cf0  
+\f0\b \cf2 -- the checkmark\
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\
+\cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\
+\cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- What line are we on? Could also use index\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgNumberOfLines \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  t\
+         
+\f0\b \cf2 -- focus on nothing -- send a closeField message to the the DG (THIS LINE IS THE FIX FOR NOT SAVING ON FIRST ENTRY IE> ENTER then CHECK. ENABLE THIS TO FIX THAT PROBLEM)\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array (we will update it)\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- put displayArrayData(theDataA,".") -- to see what it looks like\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  theDataA[\cf6 "complete"\cf0 ] \cf4 into\cf0  theCheck 
+\f0\b \cf2 -- copy the current check value into a variable\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         if theCheck then-- if it is already checked\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --            -- dispatch "ExpandDG" to card "home" -- this was added to help hide the background, however, not the most optimum solution\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --            select empty -- added to eliminate selecting the entire line of text when the checkbox is selected for the 2nd time. Side effects?? Yes, dismisses keyboard \
+
+\f1\b0 \cf0          
+\f0\b \cf2 --            dispatch "EditModeShowActionControlForIndex" to group "DataGrid 1" with the dgIndex of me\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         else\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- change it to checked\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 not\cf0 (theCheck) \cf4 into\cf0  theCheck 
+\f0\b \cf2 -- reverses a boolean value\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  theCheck \cf4 into\cf0  theDataA[\cf6 "complete"\cf0 ] 
+\f0\b \cf2 -- Modify the array with new content (for 1 column)\
+
+\f1\b0 \cf0          
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 to\cf0  theDataA 
+\f0\b \cf2 -- Copy the modified data back to the datagrid\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- if theCheck and gHideChecked and gHideImmediately then\
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  theCheck \cf4 and\cf0  \cf4 not\cf0 (gShowChecked) 
+\f0\b then\
+
+\f1\b0             
+\f0\b \cf2 -- save the modified row immediately to disk and delete it from the datagrid array\
+
+\f1\b0 \cf0             
+\f0\b \cf2 -- QUESTION: should I put theLine into the dgOrder var?\
+
+\f1\b0 \cf0             
+\f0\b \cf2 -- put displayArrayData(theDataA,".") -- to see what it looks like\
+
+\f1\b0 \cf0             
+\f0\b if
+\f1\b0  theDataA[todo] \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then
+\f1\b0   
+\f0\b \cf2 -- don't save blank lines\
+
+\f1\b0 \cf0                
+\f0\b if
+\f1\b0  theDataA[RowID] \cf4 is\cf0  \cf4 a\cf0  \cf5 number\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- this means it has an assigned record number in the database\
+
+\f1\b0 \cf0                   SQLUpdateRow theDataA 
+\f0\b \cf2 -- update the assigned record in the db\
+
+\f1\b0 \cf0                
+\f0\b else\
+
+\f1\b0                   SQLInsertRow theDataA 
+\f0\b \cf2 -- insert a new record into the database, this will assign it a RowID\
+
+\f1\b0 \cf0                
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0             
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0             
+\f0\b \cf2 ## Now we have 2 possibilities: either this is the last row in the DG, or it is not\
+
+\f1\b0 \cf0             
+\f0\b if
+\f1\b0  \cf4 the\cf0  dgNumberOfLines \cf4 of\cf0  \cf4 me\cf0  = \cf6 1\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- this is the last row, keep it\
+
+\f1\b0 \cf0                
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 empty\cf0  \cf4 into\cf0  theDataA[\cf6 "todo"\cf0 ]\
+               
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 empty\cf0  \cf4 into\cf0  theDataA[\cf6 "RowID"\cf0 ]\
+               
+\f0\b \cf3 wait
+\f1\b0 \cf0  \cf4 for\cf0  \cf6 250\cf0  \cf4 milliseconds\
+\cf0                
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 false\cf0  \cf4 into\cf0  theDataA[\cf6 "complete"\cf0 ]\
+               
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[ theLine ] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 to\cf0  theDataA \
+            
+\f0\b else\
+
+\f1\b0                
+\f0\b \cf2 -- not the last one, so delete it\
+
+\f1\b0 \cf0                
+\f0\b \cf2 -- DeleteLine theLine\
+
+\f1\b0 \cf0                
+\f0\b \cf2 -- dispatch "DeleteLine" to group "DataGrid 1" with theLine\
+
+\f1\b0 \cf0                
+\f0\b \cf3 send
+\f1\b0 \cf0  \cf6 "DeleteLine theLine"\cf0  \cf4 to\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 in\cf0  \cf6 250\cf0  \cf4 milliseconds\
+\cf0             
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0          
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0          
+\f0\b \cf3 break\
+
+\f1\b0 \cf0          \
+      
+\f0\b case
+\f1\b0  \cf6 "showMenu"\
+\cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- What line are we on? Could also use index\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgIndex \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theIndex 
+\f0\b \cf2 -- needed for the EditModeShowActionControlForIndex command\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- focus on nothing -- send a closeField message to the the DG (THIS LINE IS THE FIX FOR NOT SAVING ON FIRST ENTRY IE> ENTER then CHECK. ENABLE THIS TO FIX THAT PROBLEM)\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array (we will update it)\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- put displayArrayData(theDataA,".") -- to see what it looks like\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  theDataA[\cf6 "complete"\cf0 ] \cf4 into\cf0  theCheck 
+\f0\b \cf2 -- copy the current check value into a variable\
+
+\f1\b0 \cf0          
+\f0\b \cf3 select
+\f1\b0 \cf0  \cf4 empty\cf0  
+\f0\b \cf2 -- same as "focus on nothing". Added to deal with a visual anomaly appearing when the row menu is displayed. Side effects?? Yes, dismisses keyboard \
+
+\f1\b0 \cf0          
+\f0\b \cf3 dispatch
+\f1\b0 \cf0  \cf6 "EditModeShowActionControlForIndex"\cf0  \cf4 to\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 with\cf0  theIndex\
+         
+\f0\b \cf3 break\
+
+\f1\b0 \cf0    
+\f0\b end
+\f1\b0  
+\f0\b switch\
+end
+\f1\b0  mouseUp\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 on
+\f1\b0  EditModeActionControlClicked pTarget\
+   
+\f0\b switch
+\f1\b0  \cf4 the\cf0  \cf5 short\cf0  \cf5 name\cf0  \cf4 of\cf0  pTarget\
+      
+\f0\b case
+\f1\b0  \cf6 "clear"\cf0  
+\f0\b \cf2 -- currently not used, but demonstrates how to "uncheck" a check box\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\
+\cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\
+\cf0          
+\f0\b \cf2 -- clear the checkmark\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- What line are we on? Could also use index\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array (we will update it)\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 false\cf0  \cf4 into\cf0  theDataA[\cf6 "complete"\cf0 ] 
+\f0\b \cf2 -- change it to unchecked\
+
+\f1\b0 \cf0          
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 to\cf0  theDataA 
+\f0\b \cf2 -- Copy the modified data back to the datagrid\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- dispatch "EditModeHideActionControl" to group "DataGrid 1"\
+
+\f1\b0 \cf0          EditModeHideActionControl\
+         
+\f0\b exit
+\f1\b0  EditModeActionControlClicked\
+      
+\f0\b case
+\f1\b0  \cf6 "calendar"\
+\cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\
+\cf0          
+\f0\b \cf2 -- this routine hides or shows the calendar control then hands off to the calendar object\
+
+\f1\b0 \cf0          
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  cpLine \cf4 of\cf0  \cf4 this\cf0  \cf4 stack\cf0  \cf4 to\cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  
+\f0\b \cf2 -- 1. What line are we on? Save the dg line in a cp, we'll need it later\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put the date into tToday\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put shortDate2sqlDate(tToday) into pDate\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put "0,0,234,234" into tProps["rect"] \
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put pDate into tProps["selectedDate"]\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put "Red" into tProps["hiliteColor"]\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         put "Background" into tProps["hiliteStyle"]\
+
+\f1\b0 \cf0          
+\f0\b \cf2 --         popup widget "com.livecode.widget.calendar" at the mouseLoc with tProps --  uses the LC calendar as a widget TYPE\
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  \cf4 the\cf0  \cf5 visible\cf0  \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0  
+\f0\b then\
+
+\f1\b0             
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0  
+\f0\b \cf2 -- turns the calendar icon into a toggle\
+
+\f1\b0 \cf0             
+\f0\b \cf2 -- dispatch "EditModeHideActionControl" to group "DataGrid 1"\
+
+\f1\b0 \cf0             EditModeHideActionControl\
+            
+\f0\b exit
+\f1\b0  EditModeActionControlClicked\
+         
+\f0\b else\
+
+\f1\b0             
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 label\cf0  \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Header Bar"\cf0  \cf4 of\cf0  \cf4 card\cf0  \cf6 "home"\cf0  \cf4 into\cf0  theHeaderDate 
+\f0\b \cf2 -- copy the current date\
+
+\f1\b0 \cf0             
+\f0\b \cf3 put
+\f1\b0 \cf0  shortDate2sqlDate(theHeaderDate) \cf4 into\cf0  tDate\
+            
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  selectedDate \cf4 of\cf0  \cf4 widget\cf0  \cf6 "Calendar2"\cf0  \cf4 to\cf0  tDate\
+            
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  \cf4 mouseloc\cf0  \cf4 into\cf0  tLoc 
+\f0\b \cf2 -- x,y\
+
+\f1\b0 \cf0             
+\f0\b \cf3 subtract
+\f1\b0 \cf0  \cf6 90\cf0  \cf4 from\cf0  \cf4 item\cf0  \cf6 1\cf0  \cf4 of\cf0  tLoc\
+            
+\f0\b if
+\f1\b0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  tLoc > \cf6 340\cf0  
+\f0\b then\
+
+\f1\b0                
+\f0\b \cf3 subtract
+\f1\b0 \cf0  \cf6 140\cf0  \cf4 from\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  tLoc 
+\f0\b \cf2 -- y coord\
+
+\f1\b0 \cf0             
+\f0\b else\
+
+\f1\b0                
+\f0\b \cf3 add
+\f1\b0 \cf0  \cf6 150\cf0  \cf4 to\cf0  \cf4 item\cf0  \cf6 2\cf0  \cf4 of\cf0  tLoc\
+            
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0             
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  \cf5 loc\cf0  \cf4 of\cf0  \cf4 grp\cf0  \cf6 "NewCalendar"\cf0  \cf4 to\cf0  tLoc\
+            
+\f0\b \cf3 show
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\
+\cf0             
+\f0\b \cf2 -- answer the mouseLoc\
+
+\f1\b0 \cf0          
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0          
+\f0\b exit
+\f1\b0  EditModeActionControlClicked\
+      
+\f0\b case
+\f1\b0  \cf6 "trash"\
+\cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "Calendar"\
+\cf0          
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\
+\cf0          
+\f0\b \cf2 -- Delete your row\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgline \cf4 of\cf0  \cf4 me\cf0  \cf4 into\cf0  theLine 
+\f0\b \cf2 -- 1. What line are we on? Could also use index\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[theLine] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 into\cf0  theDataA 
+\f0\b \cf2 -- 2. put the whole row into an array\
+
+\f1\b0 \cf0          
+\f0\b \cf3 put
+\f1\b0 \cf0  theDataA[\cf6 "RowID"\cf0 ] \cf4 into\cf0  theRowID 
+\f0\b \cf2 -- copy the currently assigned SQL record# into a variable\
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  theRowID \cf4 is\cf0  \cf4 not\cf0  \cf4 empty\cf0  
+\f0\b then\
+
+\f1\b0             SQLDeleteRow theRowID 
+\f0\b \cf2 -- deletes the record from the database\
+
+\f1\b0 \cf0          
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0          
+\f0\b \cf2 ## Now we have 2 possibilities: either this is the last row in the DG, or it is not\
+
+\f1\b0 \cf0          
+\f0\b if
+\f1\b0  \cf4 the\cf0  dgNumberOfLines \cf4 of\cf0  \cf4 me\cf0  = \cf6 1\cf0  
+\f0\b then
+\f1\b0  
+\f0\b \cf2 -- this is the last row, keep it\
+
+\f1\b0 \cf0             
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 empty\cf0  \cf4 into\cf0  theDataA[\cf6 "todo"\cf0 ]\
+            
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 empty\cf0  \cf4 into\cf0  theDataA[\cf6 "RowID"\cf0 ]\
+            
+\f0\b \cf3 put
+\f1\b0 \cf0  \cf4 false\cf0  \cf4 into\cf0  theDataA[\cf6 "complete"\cf0 ]\
+            
+\f0\b \cf3 set
+\f1\b0 \cf0  \cf4 the\cf0  dgDataOfLine[ theLine ] \cf4 of\cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "DataGrid 1"\cf0  \cf4 to\cf0  theDataA \
+            EditModeHideActionControl 
+\f0\b \cf2 -- hide the control, puts record back to normal\
+
+\f1\b0 \cf0          
+\f0\b else\
+
+\f1\b0             
+\f0\b \cf2 -- not the last one, so delete it\
+
+\f1\b0 \cf0             DeleteLine theLine\
+         
+\f0\b end
+\f1\b0  
+\f0\b if\
+
+\f1\b0          ExpandDG 
+\f0\b \cf2 -- new, needs to be tested thoroughly\
+
+\f1\b0 \cf0          
+\f0\b exit
+\f1\b0  EditModeActionControlClicked\
+      
+\f0\b default\
+
+\f1\b0          
+\f0\b \cf2 -- put the long time && "default" & return after url ("file:" & specialFolderPath("documents") & "/log.txt")\
+
+\f1\b0 \cf0          
+\f0\b \cf2 -- dispatch "EditModeHideActionControl" to group "DataGrid 1"\
+
+\f1\b0 \cf0          EditModeHideActionControl\
+         
+\f0\b exit
+\f1\b0  EditModeActionControlClicked\
+   
+\f0\b end
+\f1\b0  
+\f0\b switch\
+end
+\f1\b0  EditModeActionControlClicked\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 on
+\f1\b0  EditModeActionControlHidden\
+   
+\f0\b \cf3 lock
+\f1\b0 \cf0  \cf5 screen\
+\pard\pardeftab720\partightenfactor0
+\cf0    
+\f0\b \cf2 -- at the end of any edit mode action control, or if a user CANCELS an edit mode action control\
+
+\f1\b0 \cf0    
+\f0\b \cf2 -- dismiss the row calendar if its visible\
+
+\f1\b0 \cf0    
+\f0\b if
+\f1\b0  \cf4 exists\cf0 (
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\cf0 ) 
+\f0\b then
+\f1\b0  
+\f0\b \cf3 hide
+\f1\b0 \cf0  
+\f0\b \cf3 group
+\f1\b0 \cf0  \cf6 "NewCalendar"\
+\cf0    ExpandDG\
+   
+\f0\b \cf3 unlock
+\f1\b0 \cf0  \cf5 screen\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf0 end
+\f1\b0  EditModeActionControlHidden\
+\
+}
